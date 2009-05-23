@@ -4,6 +4,10 @@
 
 <dwr>
 	<allow>
+		<!-- 
+			See web.xml for the classes DWR will generate interfaces for.
+			We don't declare them and their converters here because we use DWR's annotation mechanism.
+		-->
 	</allow>
 </dwr>
 
