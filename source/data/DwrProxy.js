@@ -6,7 +6,8 @@ Ext.namespace("Ext.ux.data");
  * @extends Ext.data.DataProxy
  * @author BigLep
  * An implementation of Ext.data.DataProxy that uses DWR to make a remote call.
- * @see http://github.com/BigLep/ExtJsWithDwr/tree
+ * @see http://github.com/BigLep/ExtJsWithDwr/tree/v2
+ * @see http://extjs.com/forum/showthread.php?t=23884
  * @constructor
  * @param {Object} config A configuration object.
  */
