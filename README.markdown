@@ -18,7 +18,7 @@ As with Ext, camel casing is used, even with abbreviations (e.g., DwrProxy inste
 
 ## Support ##
 If you find an issue, please [create a new one](http://github.com/BigLep/ExtJsWithDwr/issues).  
-Questions should be raised in the corresponding Ext forum threads:
+Questions should be raised in the corresponding Ext forum threads.
 * [Ext.ux.data.DwrProxy](http://extjs.com/forum/showthread.php?t=23884)
 
 ## License ##
