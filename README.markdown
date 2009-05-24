@@ -19,7 +19,7 @@ As with Ext, camel casing is used, even with abbreviations (e.g., DwrProxy inste
 ## Support ##
 If you find an issue, please [create a new one](http://github.com/BigLep/ExtJsWithDwr/issues).  
 Questions should be raised in the corresponding Ext forum threads:
-* Ext.ux.data.DwrProxy: [http://extjs.com/forum/showthread.php?t=23884]
+* [Ext.ux.data.DwrProxy](http://extjs.com/forum/showthread.php?t=23884)
 
 ## License ##
 The extensions within this project for integrating ExtJS and the corresponding extensions are distributed using the [Apache Software License v2](http://www.apache.org/licenses/LICENSE-2.0.html).  The external jars found with the examples (e.g., DWR and Apache Commons logging) are distributed under their corresponding licenses.
