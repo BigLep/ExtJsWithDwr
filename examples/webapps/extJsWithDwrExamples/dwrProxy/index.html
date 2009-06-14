@@ -4,9 +4,9 @@
 		<title>Ext.ux.data.DwrProxy Example</title>
 	
 		<!-- Ext Dependencies -->
-		<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-2.2/resources/css/ext-all.css" />
-	 	<script type="text/javascript" src="http://extjs.cachefly.net/ext-2.2/adapter/ext/ext-base.js"></script>
-		<script type="text/javascript" src="http://extjs.cachefly.net/ext-2.2/ext-all-debug.js"></script>
+		<link rel="stylesheet" type="text/css" href="http://extjs.com/deploy/ext-3.0-rc2/resources/css/ext-all.css" />
+	 	<script type="text/javascript" src="http://extjs.com/deploy/ext-3.0-rc2/adapter/ext/ext-base.js"></script>
+		<script type="text/javascript" src="http://extjs.com/deploy/ext-3.0-rc2/ext-all-debug.js"></script>
 		
 		<!-- DWR Dependencies -->
 		<script type='text/javascript' src='../dwr/interface/DwrProxyExampleInterface.js'></script>
@@ -46,7 +46,9 @@
 				// The reader is  JsonReader, thus the DWR function has to return an object that has an array of record data.
 				var storeUsingDwrProxy = new Ext.data.Store({
 					proxy: new Ext.ux.data.DwrProxy({
-						dwrFunction: DwrProxyExampleInterface.getGridData,
+						api : {
+							read : DwrProxyExampleInterface.getGridData
+						},
 						listeners: {
 							'beforeload': function(dataProxy, params) {
 								// DwrProxy knows to pull parameters for the Dwr call from params[dataProxy.loadArgsKey].

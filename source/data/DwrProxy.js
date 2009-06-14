@@ -1,38 +1,60 @@
-// Ensure the "User Extension" namespace is defined.
+/**
+ * http://extjs.com/forum/showthread.php?t=19529
+ */
 Ext.namespace("Ext.ux.data");
 
 /**
  * @class Ext.ux.data.DwrProxy
  * @extends Ext.data.DataProxy
- * @author BigLep
+ * @author loeppky
  * An implementation of Ext.data.DataProxy that uses DWR to make a remote call.
- * @see http://github.com/BigLep/ExtJsWithDwr/tree/v2
- * @see http://extjs.com/forum/showthread.php?t=23884
+ * Not all of Ext.data.DataProxy's configuration options make sense for Ext.ux.data.DwrProxy.
+ * The following constructor sample code contains all the available options that can be set:
+ * <code><pre>
+ * new Ext.ux.data.DwrProxy({
+ *     // Defined by Ext.data.DataProxy
+ *     api : {
+ *         read : DwrInterface.interfaceMethodName
+ *     },
+ *     // Defined by Ext.Observable
+ *     listeners: {
+ *         'beforeload': function(dataProxy, params) {
+ *             // DwrProxy knows to pull parameters for the Dwr call from params[dataProxy.loadArgsKey].
+ *             params[dataProxy.loadArgsKey] = [
+ *                 // arg1 for DwrInterface.interfaceMethodName
+ *                 // arg2 for DwrInterface.interfaceMethodName
+ *                 // etc...
+ *             ];
+ *         }
+ *     },
+ *     // Defined by Ext.ux.data.DwrProxy
+ *     loadArgsKey : 'newLoadArgsKey' // This configuration option should almost never need to be set
+ * });
+ * </pre></code>
+ * Note that currently only the "read" operation is supported.  Support for the rest of the CRUD options will be added soon.   
  * @constructor
- * @param {Object} config A configuration object.
+ * @param {Object} config A configuration object where the following can be set:
+ * - api: as defined in {@link Ext.data.HttpProxy#api}.  This is where the DWR function for a given CRUD operation is specified.
+ * Note: only "read" is currently supported.
+ * - listeners: as defined in {@link Ext.Observable#listeners}
+ * - loadArgsKey: as defined in {@link Ext.ux.data.DwrProxy#loadArgsKey}
  */
-Ext.ux.data.DwrProxy = function(config){
-	Ext.apply(this, config); // necessary since the superclass doesn't call apply
-	Ext.ux.data.DwrProxy.superclass.constructor.call(this);
+Ext.ux.data.DwrProxy = function(config) {
+	// Set loadArgsKey if its defined.
+	// We do this manually since Ext.data.DataProxy doesn't call Ext.apply with the config object.
+	if (config && config.loadArgsKey) {
+		this.loadArgsKey = config.loadArgsKey;
+	}
+	Ext.ux.data.DwrProxy.superclass.constructor.call(this, config);
 };
-
-// Alias Ext.ux.data.DWRProxy -> Ext.ux.data.DwrProxy for backwards compatibility
-Ext.ux.data.DWRProxy = Ext.ux.data.DwrProxy;
-
 Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
-
-	/**
-	 * @cfg {Function} dwrFunction The DWR function for this proxy to call during load.
-	 * Must be set before calling load.
-	 */
-	dwrFunction: null,
 	
 	/**
 	 * @cfg {String} loadArgsKey Defines where in the params object passed to the load method
 	 * that this class should look for arguments to pass to the "dwrFunction".
 	 * The order of arguments passed to a DWR function matters.
 	 * Must be set before calling load.
-	 * See the explanation of the "params" parameter in load function for more information.
+	 * See the explanation of the "params" parameter for the load function for further explanation.
 	 */
 	loadArgsKey: 'dwrFunctionArgs',
 	
@@ -74,24 +96,21 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 					dwrFunctionArgs.push(loadArgs[loadArgName]);
 				}
 			}
-			// Define callbacks for DWR to call when it gets a response from the server.
 			dwrFunctionArgs.push({
 				callback: function(response){
-					// We call readRecords instead of read because read will attempt to decode the JSON,
+					// call readRecords verses read because read will attempt to decode the JSON,
 					// but as this point DWR has already decoded the JSON.
 					var records = reader.readRecords(response);
 					dataProxy.fireEvent("load", dataProxy, response, loadCallback);
 					loadCallback.call(scope, records, arg, true);
 				},
 				exceptionHandler: function(message, exception){
-					// The "loadexception" event is supposed to pass the response, but since DWR doesn't provide that to us, we pass the message.
+					// the event is supposed to pass the response, but since DWR doesn't provide that to us, we pass the message.
 					dataProxy.fireEvent("loadexception", dataProxy, message, loadCallback, exception);
 					loadCallback.call(scope, null, arg, false);
 				}
 			});
-			// Call the dwrFunction now that we have the arguments and callback functions.
-			// Note: the scope for calling the dwrFunction doesn't matter, so we simply set it to Object.
-			this.dwrFunction.apply(Object, dwrFunctionArgs); 
+			this.api.read.apply(Object, dwrFunctionArgs); // the scope for calling the dwrFunction doesn't matter, so we simply set it to Object.
 		} else { // the beforeload event was vetoed
 			callback.call(scope || this, null, arg, false);
 		}

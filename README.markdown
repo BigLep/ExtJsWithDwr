@@ -2,10 +2,10 @@
 This project is intended host tools for integrating DWR with ExtJS.
 
 ## About this branch ##
-This branch corresponds with integrating DWR with ExtJs 2.x.  
+This branch corresponds with integrating DWR with ExtJs 3.x.  
 
 Note: there is no "master" branch.  Instead, development is done on the branches that correspond with a specific Ext JS version.
-For example, branch "v2" corresponds with work to integrate DWR with Ext JS version 2.x.
+For example, branch "v3" corresponds with work to integrate DWR with Ext JS version 3.x.
 
 ## Conventions ##
 The project aims to mirror the conventions laid out by ExtJS.  As a result, all JavaScript source is within the "source" directory.  
@@ -17,7 +17,7 @@ For example, DwrProxy extends Ext.data.DataProxy, thus its complete path is Ext.
 As with Ext, camel casing is used, even with abbreviations (e.g., DwrProxy instead of DWRProxy).
 
 ## Support ##
-If you find an issue, please [create a new one](http://github.com/BigLep/ExtJsWithDwr/issues).  
+If you find an issue, please [create a new one](http://github.com/BigLep/ExtJsWithDwr/issues).
 Questions should be raised in the corresponding Ext forum threads.
 * [Ext.ux.data.DwrProxy](http://extjs.com/forum/showthread.php?t=23884)
 
