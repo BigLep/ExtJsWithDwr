@@ -1,6 +1,3 @@
-/**
- * http://extjs.com/forum/showthread.php?t=19529
- */
 Ext.namespace("Ext.ux.data");
 
 /**

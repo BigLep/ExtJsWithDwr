@@ -9,17 +9,23 @@ For example, branch "v3" corresponds with work to integrate DWR with Ext JS vers
 
 ## Conventions ##
 The project aims to mirror the conventions laid out by ExtJS.  As a result, all JavaScript source is within the "source" directory.  
-Examples are within the "example" directory. 
+Examples are within the "example" directory.
+
+Readmes and other explanatory files are written using the Markdown syntax, as GitHub will automatically parse it.  See:
+
+* [Markdown syntax guide](http://daringfireball.net/projects/markdown/syntax)
+* [Showdown - a Markdown previewer](http://attacklab.net/showdown/)
 
 ### JavaScript ###
-All extensions are prefixed with *Ext.ux*.  If a class extends another class, then the packaging should look similar.  
-For example, DwrProxy extends Ext.data.DataProxy, thus its complete path is Ext.ux.data.DwrProxy.  
+All extensions are prefixed with *Ext.ux*.  If a class extends another class, then the packaging should look similar.
+For example, DwrProxy extends Ext.data.DataProxy, thus its complete path is Ext.ux.data.DwrProxy.
 As with Ext, camel casing is used, even with abbreviations (e.g., DwrProxy instead of DWRProxy).
 
 ## Support ##
 If you find an issue, please [create a new one](http://github.com/BigLep/ExtJsWithDwr/issues).
-Questions should be raised in the corresponding Ext forum threads.
-* [Ext.ux.data.DwrProxy](http://extjs.com/forum/showthread.php?t=23884)
+Questions should be raised in the corresponding Ext forum threads:
+
+* [Ext.ux.data.DwrProxy](http://extjs.com/forum/showthread.php?p=343185)
 
 ## License ##
 The extensions within this project for integrating ExtJS and the corresponding extensions are distributed using the [Apache Software License v2](http://www.apache.org/licenses/LICENSE-2.0.html).  The external jars found with the examples (e.g., DWR and Apache Commons logging) are distributed under their corresponding licenses.
