@@ -25,3 +25,9 @@ Upgrading to the Ext 3.x compatible version of Ext.ux.data.DwrProxy involves the
 		});
 	
 	Adopting Ext's "api" syntax makes adding support for additional CRUD operations in the future easier.
+	
+4.	(optional) Remove listeners of the "loadexception" event as this event has been deprecated in Ext 3.x.  
+	Instead, listen to the "exception" event.
+	
+5.	(optional) Remove invocations of the "load" method as it has been deprecated in Ext 3.x.  
+	Instead, use the "request" method.
