@@ -1,0 +1,138 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<title>Ext.ux.data.DwrProxy Basic Read Example</title>
+	
+		<!-- Ext Dependencies -->
+		<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.0.0/resources/css/ext-all.css" />
+	 	<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.0/adapter/ext/ext-base.js"></script>
+		<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.0/ext-all-debug.js"></script>
+		
+		<!-- DWR Dependencies -->
+		<script type='text/javascript' src='../../dwr/interface/DwrProxyExampleInterface.js'></script>
+		<script type='text/javascript' src='../../dwr/engine.js'></script>
+	
+		<!-- Ext Extensions -->
+		<!-- Note: this file isn't within the example web-app initially.  You'll need to copy it there, or change the path. -->
+		<script type="text/javascript">
+			Ext.data.DataProxy.override({
+			    request : function(action, rs, params, reader, callback, scope, options) {
+			        if (!this.api[action] && !this.load) {
+			            throw new Ext.data.DataProxy.Error('action-undefined', action);
+			        }
+			        params = params || {};
+			        if ((action === Ext.data.Api.actions.read) ? this.fireEvent("beforeload", this, params) : this.fireEvent("beforewrite", this, action, rs, params) !== false) {
+			            this.doRequest.apply(this, arguments);
+			        }
+			        else {
+			            callback.call(scope || this, null, options, false);
+			        }
+			    },
+			
+			    /**
+			     * <b>Deprecated</b> load method using old method signature. See {@doRequest} for preferred method.
+			     * @deprecated
+			     * @param {Object} params
+			     * @param {Object} reader
+			     * @param {Object} callback
+			     * @param {Object} scope
+			     * @param {Object} arg
+			     */
+			    load : null
+			});
+		</script>
+		<script type='text/javascript' src='../DwrProxy.js'></script>
+		
+	
+		<script type="text/javascript">
+			Ext.onReady(function(){
+				
+				// Provides controls to call DWR using DwrProxy with different values.
+				var formPanel = new Ext.FormPanel({
+					title : 'Grid Controls',
+					width:375,
+					frame : true,
+					defaultType: 'textfield',
+					items : [{
+						fieldLabel : 'Base String',
+						name : 'baseString',
+						value : 'baseString'
+					}, {
+						fieldLabel : 'Number Of Rows',
+						name : 'numberOfRows',
+						value : 10
+					}],
+					buttons: [{
+						text: 'Refresh Grid',
+						handler : loadGrid
+					}]
+				});
+				formPanel.render('controls');
+				
+				// Setup the store for the grid.  This store uses DwrProxy.
+				// The reader is  JsonReader, thus the DWR function has to return an object that has an array of record data.
+				var storeUsingDwrProxy = new Ext.data.Store({
+					proxy: new Ext.ux.data.DwrProxy({
+						api : {
+							read : DwrProxyExampleInterface.getGridData
+						},
+						listeners: {
+							'beforeload': function(dataProxy, params) {
+								// DwrProxy knows to pull parameters for the Dwr call from params[dataProxy.loadArgsKey].
+								params[dataProxy.loadArgsKey] = [
+									formPanel.getForm().findField('baseString').getValue(),
+									formPanel.getForm().findField('numberOfRows').getValue()
+								];
+							},
+							scope: this
+						}
+					}),
+					reader: new Ext.data.JsonReader({
+						root : 'rows'
+					}, Ext.data.Record.create([
+						{name: 'firstName'},
+						{name: 'lastName'}
+					]))
+				});
+				
+				// Define the grid to display the store's data.
+				var grid = new Ext.grid.GridPanel({
+					store : storeUsingDwrProxy,
+					columns: [
+						{header: "First Name", width: 160, sortable: true, dataIndex: 'firstName'},
+						{header: "Last Name", width: 160, sortable: true, dataIndex: 'lastName'}
+					],
+					stripeRows: true,
+					height:350,
+					width:375,
+					title:'DwrProxy Populated Grid',
+					frame : true,
+					loadMask : true
+				});
+				grid.render('grid');
+				
+				// Loads the grid's store.  
+				function loadGrid() {
+					storeUsingDwrProxy.load();
+				}
+				
+				// Load the grid's store with some initial data.
+				// The grid's store is also aoded when then the "Refresh Grid" button is pressed.
+				loadGrid();
+			});
+		</script>
+	</head>
+	<body>
+		<h1>Ext.ux.data.DwrProxy Basic Read Example</h1>
+		<h2>Part of the <a href="http://github.com/BigLep/ExtJsWithDwr/tree">ExtJsWithDwr Project</a></h2>
+		<p>
+			This example shows a grid that is backed by an Ext.data.Store that uses Ext.ux.data.DwrProxy and an Ext.data.JsonReader.
+			Clicking the "Refresh Grid" button will make a call to the Java backend using DWR.
+		</p>
+	
+		<!-- Divs to render the controls and grid. -->
+		<div id="controls"></div>
+		<div id="grid"></div>
+	</body>
+</html>
+
