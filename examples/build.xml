@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<project name="ExtJsWithDwrExamples" basedir="." default="release">
+	
+	<property name="webAppName" value="extJsWithDwrExamples" />
+	
+	
+	
+	<target name="release" depends="compile,jar,copyJavaScript" />
+	
+	<property name="js.src.dir" value="../src" />
+	<property name="output.dir" value="build" />
+	<property name="output.compile.dir" value="${output.dir}/classes" />
+	<property name="output.compile.src.dir" value="${output.compile.dir}/src" />
+	
+	<property name="output.webapps.dir" value="webapps" />
+	<property name="output.webapp.dir" value="${output.webapps.dir}/${webAppName}" />
+	<property name="output.webapp.lib.dir" value="${output.webapp.dir}/WEB-INF/lib" />
+	
+	<target name="compile">
+		<mkdir dir="${output.compile.src.dir}" />
+		<javac srcdir="src" destDir="${output.compile.src.dir}" debug="on">
+			<classpath>
+				<pathelement location ="${output.webapp.lib.dir}/dwr.jar" />
+				<pathelement location ="${output.webapp.lib.dir}/commons-logging-1.1.1.jar" />
+			</classpath>
+		</javac>
+	</target>
+	
+	<target name="jar" depends="compile">
+		<jar destfile="${output.webapp.lib.dir}/${ant.project.name}.jar" basedir="${output.compile.src.dir}" />
+	</target>
+	
+	<target name="copyJavaScript">
+		<copy file="${js.src.dir}/data/DwrProxy.js" toDir="${output.webapp.dir}/dwrProxy" />
+	</target>
+		
+	<!--
+		Make a WAR file out of the ${webAppName} directory.
+		eatj.com requires war files, thus when updating the examples, a new war file should be created and uploaded to eatj.com
+		so that it's visible at http://biglep.s156.eatj.com/extJsWithDwrExamples/.
+	-->
+	<target name="createWar" depends="release">
+		<war destfile="${webAppName}.war" webxml="${output.webapp.dir}/WEB-INF/web.xml" update="true">
+			<fileset dir="${webAppName}"/>
+		</war>
+	</target>
+</project>

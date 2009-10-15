@@ -9,39 +9,12 @@
 		<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.0/ext-all-debug.js"></script>
 		
 		<!-- DWR Dependencies -->
-		<script type='text/javascript' src='../../dwr/interface/DwrProxyExampleInterface.js'></script>
-		<script type='text/javascript' src='../../dwr/engine.js'></script>
+		<script type="text/javascript" src="../../dwr/interface/BasicReadExampleInterface.js"></script>
+		<script type="text/javascript" src="../../dwr/engine.js"></script>
 	
 		<!-- Ext Extensions -->
-		<!-- Note: this file isn't within the example web-app initially.  You'll need to copy it there, or change the path. -->
-		<script type="text/javascript">
-			Ext.data.DataProxy.override({
-			    request : function(action, rs, params, reader, callback, scope, options) {
-			        if (!this.api[action] && !this.load) {
-			            throw new Ext.data.DataProxy.Error('action-undefined', action);
-			        }
-			        params = params || {};
-			        if ((action === Ext.data.Api.actions.read) ? this.fireEvent("beforeload", this, params) : this.fireEvent("beforewrite", this, action, rs, params) !== false) {
-			            this.doRequest.apply(this, arguments);
-			        }
-			        else {
-			            callback.call(scope || this, null, options, false);
-			        }
-			    },
-			
-			    /**
-			     * <b>Deprecated</b> load method using old method signature. See {@doRequest} for preferred method.
-			     * @deprecated
-			     * @param {Object} params
-			     * @param {Object} reader
-			     * @param {Object} callback
-			     * @param {Object} scope
-			     * @param {Object} arg
-			     */
-			    load : null
-			});
-		</script>
-		<script type='text/javascript' src='../DwrProxy.js'></script>
+		<!-- Note: this file isn"t within the example web-app initially.  You"ll need to copy it there, or change the path. -->
+		<script type="text/javascript" src="../DwrProxy.js"></script>
 		
 	
 		<script type="text/javascript">
@@ -73,26 +46,25 @@
 				// The reader is  JsonReader, thus the DWR function has to return an object that has an array of record data.
 				var storeUsingDwrProxy = new Ext.data.Store({
 					proxy: new Ext.ux.data.DwrProxy({
-						api : {
-							read : DwrProxyExampleInterface.getGridData
-						},
-						listeners: {
-							'beforeload': function(dataProxy, params) {
-								// DwrProxy knows to pull parameters for the Dwr call from params[dataProxy.loadArgsKey].
-								params[dataProxy.loadArgsKey] = [
-									formPanel.getForm().findField('baseString').getValue(),
-									formPanel.getForm().findField('numberOfRows').getValue()
-								];
-							},
-							scope: this
+						apiActionToHandlerMap : {
+							read : {
+								dwrFunction : BasicReadExampleInterface.getGridData,
+								getDwrArgsFunction : function(trans) {
+									return [
+										formPanel.getForm().findField('baseString').getValue(),
+										formPanel.getForm().findField('numberOfRows').getValue()
+									];
+								}
+							}
 						}
 					}),
 					reader: new Ext.data.JsonReader({
-						root : 'rows'
-					}, Ext.data.Record.create([
-						{name: 'firstName'},
-						{name: 'lastName'}
-					]))
+						root : 'objectsToConvertToRecords',
+						fields : [
+							{name: 'firstName'},
+							{name: 'lastName'}
+						]
+					})
 				});
 				
 				// Define the grid to display the store's data.

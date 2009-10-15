@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="MacRoman"?>
 <jardesc>
-<jar path="ExtJsWithDwr/examples/webapps/extJsWithDwrExamples/WEB-INF/lib/examples.jar"/>
+<jar path="ExtJsWithDwr/examples/webapps/extJsWithDwrExamples/WEB-INF/lib/ExtJsWithDwrExamples.jar"/>
 <options buildIfNeeded="true" compress="false" descriptionLocation="/ExtJsWithDwr/examples/examples.jardesc" exportErrors="true" exportWarnings="true" includeDirectoryEntries="false" overwrite="false" saveDescription="true" storeRefactorings="false" useSourceFolders="false"/>
 <storedRefactorings deprecationInfo="true" structuralOnly="false"/>
 <selectedProjects/>
@@ -13,5 +13,4 @@
 <selectedElements exportClassFiles="true" exportJavaFiles="true" exportOutputFolder="false">
 <javaElement handleIdentifier="=ExtJsWithDwr/examples\/src"/>
 </selectedElements>
-<fatjar builder="org.eclipse.jdt.ui.plain_jar_builder" launchConfig=""/>
 </jardesc>

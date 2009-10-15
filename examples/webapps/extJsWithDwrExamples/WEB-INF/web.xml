@@ -16,9 +16,10 @@
 		<init-param>
 			<param-name>classes</param-name>
 			<param-value>
-				DwrProxyExample
-				, DwrProxyExample$Employee
-				, DwrProxyExample$ExtJsonReaderInput
+				com.github.extjswithdwr.examples.dwrproxy.BasicReadExample
+				, com.github.extjswithdwr.examples.dwrproxy.CrudExample
+				, com.github.extjswithdwr.examples.dwrproxy.Employee
+				, com.github.extjswithdwr.JsonReaderResponse
 			</param-value>
 		</init-param>
 	</servlet>
