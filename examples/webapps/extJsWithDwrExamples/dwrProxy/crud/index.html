@@ -1,0 +1,159 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<title>Ext.ux.data.DwrProxy CRUD Example</title>
+	
+		<!-- Ext Dependencies -->
+		<link rel="stylesheet" type="text/css" href="http://extjs.cachefly.net/ext-3.0.0/resources/css/ext-all.css" />
+	 	<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.0/adapter/ext/ext-base.js"></script>
+		<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.0/ext-all-debug.js"></script>
+		
+		
+		<!-- DWR Dependencies -->
+		<script type="text/javascript" src="../../dwr/interface/CrudExampleInterface.js"></script>
+		<script type="text/javascript" src="../../dwr/engine.js"></script>
+	
+		<!-- Ext Extensions -->
+		<!-- Note: this file isn't within the example web-app initially.  You'll need to copy it there, or change the path. -->
+		<script type="text/javascript" src="../DwrProxy.js"></script>
+		<script type="text/javascript" src="http://extjs.cachefly.net/ext-3.0.0/examples/ux/RowEditor.js"></script>
+		<link rel="stylesheet" href="http://extjs.cachefly.net/ext-3.0.0/examples//ux/css/RowEditor.css" />
+		
+		<script type="text/javascript">
+			Ext.onReady(function() {
+				
+				var reader = new Ext.data.JsonReader({
+					root : 'objectsToConvertToRecords',
+					idProperty: 'id',
+					fields : [
+						{name: 'id'},
+						{name: 'firstName', allowBlank:false},
+						{name: 'lastName', allowBlank:false}
+					]
+				});
+				
+				// The new DataWriter component.
+				var writer = new Ext.data.JsonWriter({
+				    writeAllFields: true,
+					listful : true
+				});
+				
+				// Setup the store for the grid.  This store uses DwrProxy.
+				// The reader is  JsonReader, thus the DWR function has to return an object that has an array of record data.
+				var store = new Ext.data.Store({
+					proxy: new Ext.ux.data.DwrProxy({
+						apiActionToHandlerMap : {
+							read : {
+								dwrFunction : CrudExampleInterface.read
+							},
+							create : {
+								dwrFunction : CrudExampleInterface.create
+							},
+							update : {
+								dwrFunction : CrudExampleInterface.update
+							},
+							destroy : {
+								dwrFunction : CrudExampleInterface.destroy
+							}
+						}
+					}),
+					reader: reader,
+					writer : writer,
+					autoSave: true
+				});
+				
+				// A new generic text field
+				var textField =  new Ext.form.TextField();
+				
+				var editor = new Ext.ux.grid.RowEditor({
+			        saveText: 'Update',
+					listeners : {
+						hide : onEditorHide
+					}
+			    });
+				
+				// Define the grid to display the store's data.
+				var grid = new Ext.grid.GridPanel({
+					store : store,
+					columns: [
+						{header: "Id", width: 30, sortable: true, dataIndex: 'id'},
+						{header: "First Name", width: 160, sortable: true, dataIndex: 'firstName', editor:new Ext.form.TextField({})},
+						{header: "Last Name", width: 160, sortable: true, dataIndex: 'lastName', editor:new Ext.form.TextField({})}
+					],
+					stripeRows: true,
+					height:350,
+					width:375,
+					title:'DwrProxy Populated Grid',
+					frame : true,
+					loadMask : true,
+					plugins: [editor],
+					tbar : [{
+			            text: 'Add',
+			            handler: onAdd
+			        }, '-', {
+			            text: 'Delete',
+			            handler: onDelete,
+			        }, '-'],
+					viewConfig: {
+			            forceFit: true
+			        },
+					autoScroll : true
+				});
+				grid.render('grid');
+				
+				// Loads the grid's store.  
+				function loadGrid() {
+					store.load();
+				};
+				
+				function onEditorHide() {
+					var record = store.getAt(0);
+					if (record.phantom && !record.dirty) {
+						store.remove(record);
+					}
+				};
+				
+				function onAdd(btn, ev) {
+			        var newRecord = new store.recordType({
+			            firstName : '',
+			            lastName: ''
+			        });
+			        editor.stopEditing();
+			        store.insert(0, newRecord);
+			        editor.startEditing(0, true);
+			    };
+
+			    /**
+			     * onDelete
+			     */
+			   function onDelete(btn, ev) {
+			   		store.autoSave = false;
+					store.batch = true;
+			        var records = grid.getSelectionModel().getSelections();
+			        Ext.each(records, function(record) {
+						store.remove(record);
+					});
+					store.save();
+					store.autoSave = true;
+					store.batch = false;
+			    }
+				
+				// Load the grid's store with some initial data.
+				// The grid's store is also added when then the "Refresh Grid" button is pressed.
+				loadGrid();
+			});
+		</script>
+	</head>
+	<body>
+		<h1>Ext.ux.data.DwrProxy CRUD Example</h1>
+		<h2>Part of the <a href="http://github.com/BigLep/ExtJsWithDwr/tree">ExtJsWithDwr Project</a></h2>
+		<p>
+			This example shows a grid that is backed by an Ext.data.Store that uses Ext.ux.data.DwrProxy and an Ext.data.JsonReader.
+			Clicking the "Refresh Grid" button will make a call to the Java backend using DWR.
+		</p>
+	
+		<!-- Divs to render the grid. -->
+		<div id="grid"></div>
+	</body>
+</html>
+
