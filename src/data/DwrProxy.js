@@ -32,7 +32,7 @@ Ext.namespace("Ext.ux.data");
  *			}, 
  *			destroy : {
  *				dwrFunction : DwrInterface.destroy,
- *				// Define a custom funciton to pass a login and password, in addition to the objects to delete.
+ *				// Define a custom function to pass a login and password, in addition to the objects to delete.
  *				getDwrArgsFunction : function(trans, recordDataArray) {
  *					return [recordDataArray, this.login, this.password];
  *				}
@@ -65,12 +65,14 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 	 * - dwrFunction : {Function} [Required] The DWR-generated function to call for the action. 
 	 * - getDwrArgsFunction : {Function} [Optional] Function to call to generate the arguments for the dwrFunction.
 	 *   This {@link Function} will be passed a {@link Ext.ux.data.DataProxyTransaction},
-	 *   and if it's a write action, also the {@link Ext.data.Record#data} to write.
-	 *   This getDwrArgsFunction must return an Array of arguments in the order needed by the dwrFunction.
+	 *   and if it's a write action, also the {@link Ext.data.Record#data}d to write.
+	 *   The getDwrArgsFunction must return an Array of arguments in the order needed by the dwrFunction.
 	 *   This class will generate the DWR callback function (the final argument passed to the dwrFunction).
-	 *   If no getDwrArgsFunction is defined, then for the read case no arguments will be passed to the dwrFunction.
-	 *   In the write case, the array of {@link Ext.data.Record#data} will be passed.
+	 *   If no getDwrArgsFunction is defined, then for the read case no arguments will be passed to the dwrFunction (see {@link #defaultGetDwrArgsFunctionForRead}).
+	 *   In the write case, the array of {@link Ext.data.Record#data} will be passed (see {@link #defaultGetDwrArgsFunctionForWrite}).
 	 * - getDwrArgsScope : {Object} [Optional] The scope to execute getDwrArgsFunction.  Defaults to "Object".
+	 * Note: this option is very similar to {@link Ext.data.DataProxy#api}, but since the values need to be different (e.g., specific a dwrFunction), 
+	 * this new option is created so as not to create confusion.  The name of this option is also more "clear".
 	 */
 	apiActionToHandlerMap : {},
 	
@@ -78,7 +80,7 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 	 * DwrProxy implementation of {@link Ext.data.DataProxy#doRequest}.
 	 * This implementation attempts to mirror {@link Ext.data.HttpProxy#doRequest} as much as possible.
 	 * The getDwrArgsFunction is called for the corresponding action, 
-	 * and then a request is made for the dwrFunction that corresponds with the provided action..
+	 * and then a request is made for the dwrFunction that corresponds with the provided action.
 	 * @param {String} action See {@link Ext.data.DataProxy#request}.
 	 * @param {Ext.data.Record/Ext.data.Record[]} records See {@link Ext.data.DataProxy#request}.
 	 * @param {Object} params See {@link Ext.data.DataProxy#request}.
@@ -94,13 +96,16 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 		if (!apiActionHandler) {
 			throw new Exception('No API Action Handler defined for action: ' + action);
 		}
-		// Determing the getDwrArgsFunction to use, either a user-provided function or  a default function.
+		
+		// Determine the getDwrArgsFunction to use: either a user-provided function or a default function.
 		var getDwrArgsFunction;
 		var getDwrArgsScope = Object;
 		if (apiActionHandler.getDwrArgsFunction) {
+			// A user-defined function exists for this action.
 			getDwrArgsFunction = apiActionHandler.getDwrArgsFunction;
 			getDwrArgsScope = apiActionHandler.getDwrArgsScope;
 		} else {
+			// Use a default function.
 			if (action === Ext.data.Api.actions.read) {
 				getDwrArgsFunction = this.defaultGetDwrArgsFunctionForRead;
 			} else {
@@ -112,17 +117,28 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 		apiActionHandler.dwrFunction.apply(Object, dwrArgs); // the scope for calling the dwrFunction doesn't matter, so we simply set it to Object.
 	},
 	
+	/**
+	 * @return {Array} Empty array, meaning no arguments are passed to the read dwrFunction.
+	 * @private
+	 */
 	defaultGetDwrArgsFunctionForRead : function(trans, recordDataArray) {
 		return [];
 	},
 	
+	/**
+	 * @param {Ext.ux.data.DataProxyTransaction} trans
+	 * @param {Array} recordDataArray Array of {@link Ext.data.Record#data} to write.
+	 * @return {Object[]} The recordDataArray wrapped in an array, meaning a list of record data will be sent to backend. 
+	 * @private
+	 */
 	defaultGetDwrArgsFunctionForWrite : function(trans, recordDataArray) {
 		return [recordDataArray];
 	},
 	
 	/**
-	 * @param {Ext.data.Record[]} records
-	 * @return {Object[]} Array containing the result of {@link Ext.data.Record#data}.
+	 * @param {Ext.data.Record[]} records The {@link Ext.data.Record}s to pull the data out of.
+	 * @return {Object[]} Array containing the result of {@link Ext.data.Record#data} for each {@link Ext.data.Record}.
+	 * This is used so the raw {@link Ext.data.Record}s are not sent to DWR, since they have fields the DWR DTO won't be expecting.
 	 */
 	getRecordDataArray : function(records) {
 		var recordDataArray = [];
@@ -134,10 +150,10 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 	
 	/**
 	 * Helper method for doRequest which returns a callback function for a DWR request.
-	 * The returned callback function in turn invokes the provided callback function.
+	 * The returned callback function in turn invokes the callback function within the provided {Ext.ux.data.DataProxyTransaction}.
 	 * This mirrors HttpProxy#createCallsback.
 	 * DWR is unique though in that it allows one to define a callback function for success and callback function for an exception.
-	 * This exceptionHandler callback parallels Ext's "remote exception" case.
+	 * This exceptionHandler callback parallels Ext's "response exception" case.
 	 * This method thus returns two callback functions groupded as a single object that can be appended to the DWR function arguments as required by DWR.
 	 * @param {Ext.ux.data.DataProxyTransaction} trans The arguments passed to {@link #doRequest}.
 	 * @private
@@ -161,7 +177,7 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 
 	/**
 	 * Helper method for createCallback for handling the read action.
-	 * After creating records from the provided response, it calls the provided callback function.
+	 * After creating records from the provided response, it calls the callback function within the provided {Ext.ux.data.DataProxyTransaction}.
 	 * This mirrors HttpProxy#onRead.
 	 * @param {Ext.ux.data.DataProxyTransaction} trans The arguments passed to {@link #doRequest}.
 	 * @param {Object} response The response from the DWR call.  This should be an Object which can be converted to {@link Ext.data.Records}.
@@ -170,17 +186,17 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 	onRead : function(trans, response) {
 		var readDataBlock;
 		try {
-			// Call readRecords verses read because read will attempt to decode the JSON,
-			// but as this point DWR has already decoded the JSON.
+			// Call readRecords verses read because read will attempt to decode JSON to create an Object,
+			// but as this point DWR has already created an Object..
 			readDataBlock = trans.reader.readRecords(response);
 		} catch(e) {
-			this.fireEvent('exception', this, 'response', trans.action, trans.options, response, e);
+			this.fireEvent("exception", this, 'response', trans.action, trans.options, response, e);
 			trans.callback.call(trans.scope, null, trans.options, false);
 			return;
 		}
 		var success = readDataBlock[trans.reader.meta.successProperty];
 		if (success === false) {
-			this.fireEvent('exception', this, 'remote', trans.action, trans.options, response, null);
+			this.fireEvent("exception", this, 'remote', trans.action, trans.options, response, null);
 		} else {
 			this.fireEvent("load", this, trans, trans.options);
 		}
@@ -199,16 +215,16 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 		try {
 			readDataBlock = trans.reader.readResponse(trans.action, response);
 		} catch (e) {
-			this.fireEvent('exception', this, 'response', trans.action, trans.options, response, e);
+			this.fireEvent("exception", this, 'response', trans.action, trans.options, response, e);
 			trans.callback.call(trans.scope, null, trans.options, false);
 			return;
 		}
 		var success = readDataBlock[trans.reader.meta.successProperty];
 		var readRecords = readDataBlock[trans.reader.meta.root];
 		if (success === false) {
-			this.fireEvent('exception', this, 'remote', trans.action, trans.options, response, trans.records);
+			this.fireEvent("exception", this, 'remote', trans.action, trans.options, response, trans.records);
 		} else {
-			this.fireEvent('write', this, trans.action, readRecords, readDataBlock, trans.records, trans.options);
+			this.fireEvent("write", this, trans.action, readRecords, readDataBlock, trans.records, trans.options);
 		}
 		trans.callback.call(trans.scope, readRecords, response, success);
 	}
@@ -216,7 +232,7 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 
 /**
  * @class Ext.ux.data.DataProxyTransaction
- * Ecapsolates the parameters passed to {@link Ext.data.DataProxy#request}.
+ * Encapsulates the parameters passed to {@link Ext.data.DataProxy#request}.
  * @constructor
  * @param {String} action The crud action type (create, read, update, destroy).  Note: only "read" is currently supported.
  * @param {Ext.data.Record/Ext.data.Record[]} records If action is "read", records will be null.

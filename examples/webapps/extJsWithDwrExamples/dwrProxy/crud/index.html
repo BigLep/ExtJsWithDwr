@@ -32,7 +32,6 @@
 					]
 				});
 				
-				// The new DataWriter component.
 				var writer = new Ext.data.JsonWriter({
 				    writeAllFields: true,
 					listful : true
@@ -127,13 +126,18 @@
 			     * onDelete
 			     */
 			   function onDelete(btn, ev) {
+			   		// Turn off autoSave temporariliy so that one call is made for all the records to delete.
 			   		store.autoSave = false;
 					store.batch = true;
 			        var records = grid.getSelectionModel().getSelections();
 			        Ext.each(records, function(record) {
 						store.remove(record);
 					});
+					
+					// Manuaully trigger the save since autoSave is off.
 					store.save();
+					
+					// Restore autoSave functionality.
 					store.autoSave = true;
 					store.batch = false;
 			    }
@@ -148,8 +152,8 @@
 		<h1>Ext.ux.data.DwrProxy CRUD Example</h1>
 		<h2>Part of the <a href="http://github.com/BigLep/ExtJsWithDwr/tree">ExtJsWithDwr Project</a></h2>
 		<p>
-			This example shows a grid that is backed by an Ext.data.Store that uses Ext.ux.data.DwrProxy and an Ext.data.JsonReader.
-			Clicking the "Refresh Grid" button will make a call to the Java backend using DWR.
+			This example shows a grid that is backed by an Ext.data.Store that uses Ext.ux.data.DwrProxy, Ext.data.JsonReader, and Ext.data.JsonWriter.
+			Adding, editing, and deleting will make calls to the Java backend using DWR.
 		</p>
 	
 		<!-- Divs to render the grid. -->
