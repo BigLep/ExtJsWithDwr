@@ -41,7 +41,7 @@
 	-->
 	<target name="createWar" depends="release">
 		<war destfile="${webAppName}.war" webxml="${output.webapp.dir}/WEB-INF/web.xml" update="true">
-			<fileset dir="${webAppName}"/>
+			<fileset dir="${output.webapp.dir}"/>
 		</war>
 	</target>
 </project>

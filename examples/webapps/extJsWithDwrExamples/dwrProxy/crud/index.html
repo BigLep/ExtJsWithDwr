@@ -33,7 +33,7 @@
 				});
 				
 				var writer = new Ext.data.JsonWriter({
-				    writeAllFields: true,
+					writeAllFields: true,
 					listful : true
 				});
 				
@@ -65,11 +65,11 @@
 				var textField =  new Ext.form.TextField();
 				
 				var editor = new Ext.ux.grid.RowEditor({
-			        saveText: 'Update',
+					saveText: 'Update',
 					listeners : {
 						hide : onEditorHide
 					}
-			    });
+				});
 				
 				// Define the grid to display the store's data.
 				var grid = new Ext.grid.GridPanel({
@@ -87,15 +87,15 @@
 					loadMask : true,
 					plugins: [editor],
 					tbar : [{
-			            text: 'Add',
-			            handler: onAdd
-			        }, '-', {
-			            text: 'Delete',
-			            handler: onDelete,
-			        }, '-'],
+						text: 'Add',
+						handler: onAdd
+					}, '-', {
+						text: 'Delete',
+						handler: onDelete,
+					}, '-'],
 					viewConfig: {
-			            forceFit: true
-			        },
+						forceFit: true
+					},
 					autoScroll : true
 				});
 				grid.render('grid');
@@ -113,34 +113,34 @@
 				};
 				
 				function onAdd(btn, ev) {
-			        var newRecord = new store.recordType({
-			            firstName : '',
-			            lastName: ''
-			        });
-			        editor.stopEditing();
-			        store.insert(0, newRecord);
-			        editor.startEditing(0, true);
-			    };
+					var newRecord = new store.recordType({
+						firstName : '',
+						lastName: ''
+					});
+					editor.stopEditing();
+					store.insert(0, newRecord);
+					editor.startEditing(0, true);
+				};
 
-			    /**
-			     * onDelete
-			     */
+				/**
+				 * onDelete
+				 */
 			   function onDelete(btn, ev) {
-			   		// Turn off autoSave temporariliy so that one call is made for all the records to delete.
+			   		// Turn off autoSave temporarily so that one call is made for all the records to delete.
 			   		store.autoSave = false;
 					store.batch = true;
-			        var records = grid.getSelectionModel().getSelections();
-			        Ext.each(records, function(record) {
+					var records = grid.getSelectionModel().getSelections();
+					Ext.each(records, function(record) {
 						store.remove(record);
 					});
 					
-					// Manuaully trigger the save since autoSave is off.
+					// Manually trigger the save since autoSave is off.
 					store.save();
 					
 					// Restore autoSave functionality.
 					store.autoSave = true;
 					store.batch = false;
-			    }
+				}
 				
 				// Load the grid's store with some initial data.
 				// The grid's store is also added when then the "Refresh Grid" button is pressed.

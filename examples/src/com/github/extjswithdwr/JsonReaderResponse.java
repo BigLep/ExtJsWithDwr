@@ -37,16 +37,26 @@ public class JsonReaderResponse<T> {
 	public List<T> objectsToConvertToRecords;
 	
 	/**
-	 * This property name corresponds with the default for Ext.data.JsonReader.successProperty.
+	 * @see Ext.data.JsonReader.successProperty
 	 */
 	@RemoteProperty
 	public boolean success;
 	
+	/**
+	 * Creates a {@link #success}ful JsonReaderResponse with the provided {@link #objectsToConvertToRecords}.
+	 * @param objectsToConvertToRecords
+	 */
 	public JsonReaderResponse(List<T> objectsToConvertToRecords) {
 		this.objectsToConvertToRecords = objectsToConvertToRecords;
 		success = true;
 	}
 	
+	/**
+	 * Creates an un{@link #success}ful JsonReaderResponse with null {@link #objectsToConvertToRecords}.
+	 * This signals the case where the client established a connection with the server,
+	 * but the server couldn't fulfill it (e.g., user doesn't have proper user credentials).
+	 * @param objectsToConvertToRecords
+	 */
 	public JsonReaderResponse() {
 		this.objectsToConvertToRecords = null;
 		success = false;
