@@ -158,15 +158,14 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 			// but as this point DWR has already created an Object.
 			readDataBlock = request.reader.readRecords(response);
 		} catch(e) {
-			return this.handleResponseException(request, message, e);
+			return this.handleResponseException(request, response, e);
 		}
-		var success = readDataBlock[request.reader.meta.successProperty];
-		if (success === false) {
+		if (readDataBlock.success === false) {
 			this.fireEvent("exception", this, 'remote', request.action, request.options, response, null);
 		} else {
 			this.fireEvent("load", this, request, request.options);
 		}
-		request.callback.call(request.scope, readDataBlock, request.options, success);
+		request.callback.call(request.scope, readDataBlock, request.options, readDataBlock.success);
 	},
 	
 	/**
@@ -181,16 +180,14 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 		try {
 			readDataBlock = request.reader.readResponse(request.action, response);
 		} catch (e) {
-			return this.handleResponseException(request, message, e);
+			return this.handleResponseException(request, response, e);
 		}
-		var success = readDataBlock[request.reader.meta.successProperty];
-		var readRecords = readDataBlock[request.reader.meta.root];
-		if (success === false) {
+		if (readDataBlock.success === false) {
 			this.fireEvent("exception", this, 'remote', request.action, request.options, response, request.records);
 		} else {
-			this.fireEvent("write", this, request.action, readRecords, readDataBlock, request.records, request.options);
+			this.fireEvent("write", this, request.action, readDataBlock.data, readDataBlock, request.records, request.options);
 		}
-		request.callback.call(request.scope, readRecords, response, success);
+		request.callback.call(request.scope, readDataBlock.data, readDataBlock, readDataBlock.success);
 	},
 	
 	/**
