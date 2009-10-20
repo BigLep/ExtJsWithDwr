@@ -92,7 +92,8 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 			throw new Exception('No API Action Handler defined for action: ' + action);
 		}
 		
-		var dwrArgs = apiActionHandler.getDwrArgsFunction.call(apiActionHandler.getDwrArgsScope, request, this.getRecordDataArray(records)) || [];
+		var dwrArgs = apiActionHandler.getDwrArgsFunction.call(
+			apiActionHandler.getDwrArgsScope, request, this.getRecordDataArray(records), this.getRecordDataBeforeUpdateArray(records)) || [];
 		dwrArgs.push(this.createCallback(request));
 		apiActionHandler.dwrFunction.apply(Object, dwrArgs); // the scope for calling the dwrFunction doesn't matter, so we simply set it to Object.
 	},
@@ -104,6 +105,16 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 	 */
 	getRecordDataArray : function(records) {
 		return Ext.pluck(records, 'data');
+	},
+	
+	/**
+	 * @param {Ext.data.Record[]} records The {@link Ext.data.Record}s to pull the data out of.
+	 * @return {Object[]} Array containing the result of {@link Ext.data.Record#json} for each {@link Ext.data.Record}.
+	 * The "json" field stores the contents of the {@link Ext.data.Record} were modified.
+	 * This is used so the raw {@link Ext.data.Record}s are not sent to DWR, since they have fields the DWR DTO won't be expecting.
+	 */
+	getRecordDataBeforeUpdateArray : function(records) {
+		return Ext.pluck(records, 'json');
 	},
 	
 	/**
@@ -201,12 +212,15 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
  * @cfg {String} action [Required] The {@link Ext.data.Api} action this handler is for.
  * @cfg {Function} dwrFunction [Required] The DWR-generated function to call for the action. 
  * @cfg {Function} getDwrArgsFunction [Optional] Function to call to generate the arguments for the dwrFunction.
- * This {@link Function} will be passed a {@link Ext.ux.data.DataProxy.Request},
- * and if it's a write action, also the {@link Ext.data.Record#data}s to write.
+ * This {@link Function} will be passed:
+ * - {@link Ext.ux.data.DataProxy.Request} This is useful for all action.
+ * - {@link Ext.data.Record#data}s to write with their current (dirty) values.
+ *   This is useful for all write actions.
+ * - {@link Ext.data.Record#data}s to write with the values before any changes were made.
+ *   This is only useful for updates.
  * The getDwrArgsFunction must return an Array of arguments in the order needed by the dwrFunction.
  * This class will generate the DWR callback function (the final argument passed to the dwrFunction).
- * If no getDwrArgsFunction is defined, then for the read case no arguments will be passed to the dwrFunction (see {@link #defaultGetDwrArgsFunctionForRead}).
- * In the write case, the array of {@link Ext.data.Record#data} will be passed (see {@link #defaultGetDwrArgsFunctionForWrite}).
+ * If no getDwrArgsFunction is defined, see {@link #defaultGetDwrArgsFunctions} for defaults.
  * @cfg {Object} getDwrArgsScope [Optional] The scope to execute getDwrArgsFunction.  Defaults to "Object".
  */
 Ext.ux.data.DwrProxy.ActionHandler = function(config) {
@@ -221,18 +235,14 @@ Ext.ux.data.DwrProxy.ActionHandler = function(config) {
 		throw new Exception('"dwrFunction" is not defined.');
 	}
 	if (!this.getDwrArgsFunction) {
-		if (this.action === Ext.data.Api.actions.read) {
-			this.getDwrArgsFunction = this.defaultGetDwrArgsFunctions.read;
-		} else {
-			this.getDwrArgsFunction = this.defaultGetDwrArgsFunctions.write;
-		}
+		this.getDwrArgsFunction = this.defaultGetDwrArgsFunctions[this.action];
 	}
 	if (!this.getDwrArgsScope) {
 		this.getDwrArgsScope = Object;
 	}
 };
 Ext.extend(Ext.ux.data.DwrProxy.ActionHandler, Object, {
-	
+
 	/*
 	 * Private properties
 	 */
@@ -248,10 +258,32 @@ Ext.extend(Ext.ux.data.DwrProxy.ActionHandler, Object, {
 		/**
 		 * @param {Ext.ux.data.DataProxy.Request} request
 		 * @param {Array} recordDataArray Array of {@link Ext.data.Record#data} to write.
-		 * @return {Object[]} The recordDataArray wrapped in an array so the dwrFunction will send one parameter: a list of {@link Ext.data.Record#data}s. 
+		 * @return {Object[]} The recordDataArray wrapped in an array so the dwrFunction will send one parameter: a list of {@link Ext.data.Record#data}s to create.
 		 * @private
 		 */
-		write : function(request, recordDataArray) {
+		create : function(request, recordDataArray) {
+			return [recordDataArray];
+		},
+		
+		/**
+		 * @param {Ext.ux.data.DataProxy.Request} request
+		 * @param {Array} recordDataArray Array of {@link Ext.data.Record#data} to write.
+		 * @param {Array} recordDataArray Array of {@link Ext.data.Record#data} to update.
+		 * @return {Object[]} The oldRecordDataArray and recordDataArray wrapped in an array so the dwrFunction will send two parameters: 
+		 * a list of {@link Ext.data.Record#data}s that are to be updated and a list of their corresponding new values.
+		 * @private
+		 */
+		update : function(request, recordDataArray, oldRecordDataArray) {
+			return [oldRecordDataArray, recordDataArray];
+		},
+		
+		/**
+		 * @param {Ext.ux.data.DataProxy.Request} request
+		 * @param {Array} recordDataArray Array of {@link Ext.data.Record#data} to write.
+		 * @return {Object[]} The recordDataArray wrapped in an array so the dwrFunction will send one parameter: a list of {@link Ext.data.Record#data}s to destroy.
+		 * @private
+		 */
+		destroy : function(request, recordDataArray) {
 			return [recordDataArray];
 		}
 	}
