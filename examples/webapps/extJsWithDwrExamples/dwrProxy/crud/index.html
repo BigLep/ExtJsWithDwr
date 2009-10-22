@@ -58,6 +58,7 @@
 					}),
 					reader: reader,
 					writer : writer,
+					autoLoad : true,
 					autoSave: true
 				});
 				
@@ -100,11 +101,6 @@
 				});
 				grid.render('grid');
 				
-				// Loads the grid's store.  
-				function loadGrid() {
-					store.load();
-				};
-				
 				function onEditorHide() {
 					var record = store.getAt(0);
 					if (record.phantom && !record.dirty) {
@@ -141,10 +137,6 @@
 					store.autoSave = true;
 					store.batch = false;
 				}
-				
-				// Load the grid's store with some initial data.
-				// The grid's store is also added when then the "Refresh Grid" button is pressed.
-				loadGrid();
 			});
 		</script>
 	</head>
