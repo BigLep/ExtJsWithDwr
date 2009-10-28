@@ -104,17 +104,21 @@ Ext.extend(Ext.ux.data.DwrProxy, Ext.data.DataProxy, {
 	 * This is used so the raw {@link Ext.data.Record}s are not sent to DWR, since they have fields the DWR DTO won't be expecting.
 	 */
 	getRecordDataArray : function(records) {
-		return Ext.pluck(records, 'data');
+		return Ext.pluck(records, 'data') || [];
 	},
 	
 	/**
-	 * @param {Ext.data.Record[]} records The {@link Ext.data.Record}s to pull the data out of.
-	 * @return {Object[]} Array containing the result of {@link Ext.data.Record#json} for each {@link Ext.data.Record}.
-	 * The "json" field stores the contents of the {@link Ext.data.Record} were modified.
+	 * @param {Ext.data.Record[]} records The {@link Ext.data.Record}s that have been updated to get their pre-upadate data from.
+	 * @return {Object[]} Array containing the {@link Ext.data.Record#data} before it was updated.
 	 * This is used so the raw {@link Ext.data.Record}s are not sent to DWR, since they have fields the DWR DTO won't be expecting.
 	 */
 	getRecordDataBeforeUpdateArray : function(records) {
-		return Ext.pluck(records, 'json');
+		var recordDataBeforeUpdate = [];
+		Ext.each(records, function(record) {
+			// Create the record data as it existed before it was updated.
+			recordDataBeforeUpdate.push(Ext.apply({}, record.modified, record.data));
+		});
+		return recordDataBeforeUpdate;
 	},
 	
 	/**
