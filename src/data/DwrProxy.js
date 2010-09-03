@@ -10,7 +10,7 @@ Ext.namespace("Ext.ux.data");
  * <code><pre>
  *	new Ext.ux.data.DwrProxy({
  *		// Defined by Ext.data.DataProxy
- *		apiActionToHanderMap : {
+ *		apiActionToHandlerMap : {
  *			read : {
  * 				dwrFunction : DwrInterface.read,
  *				// Define a custom function that passes the paging parameters to DWR.
