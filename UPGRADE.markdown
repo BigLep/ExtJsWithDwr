@@ -2,7 +2,7 @@
 
 Upgrading to the Ext 3.x compatible version of Ext.ux.data.DwrProxy involves the following steps:
 
-1. 	Download the 3.x compatible version of Ext.ux.data.DataProxy from <http://github.com/BigLep/ExtJsWithDwr/blob/v3/source/data/DwrProxy.js>
+1. 	Download the 3.x compatible version of Ext.ux.data.DataProxy from <http://github.com/BigLep/ExtJsWithDwr/blob/v3/src/data/DwrProxy.js>
 
 2. 	Change references from Ext.ux.data.DWRProxy to Ext.ux.data.DwrProxy.
 	The Ext.ux.data.DWRProxy alias has been dropped, although you can add it back with:
